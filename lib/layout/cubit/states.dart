@@ -5,3 +5,5 @@ class PlayAzkarState extends AzkarStates{}
 class PlayAgainAzkarState extends AzkarStates{}
 class PauseAzkarState extends AzkarStates{}
 class StopAzkarState extends AzkarStates{}
+class ChangeModeState extends AzkarStates{}
+class ChangePosition extends AzkarStates{}

@@ -1,10 +1,10 @@
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled3/layout/cubit/states.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:untitled3/models/azkar_model.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:untitled3/shared/cash_helper.dart';
 
 class AzkarCubit extends Cubit<AzkarStates> {
   AzkarCubit() : super(InitAzkarState());
@@ -60,35 +60,64 @@ class AzkarCubit extends Cubit<AzkarStates> {
   ];
 
   final player = AudioPlayer();
-  bool isPlaying=false;
-  Icon icon=Icon(Icons.play_arrow);
-  changeToPauseIcon ()
-  {
-  icon=Icon(Icons.pause);
-  isPlaying=false;
-  } changeToPlayIcon ()
-  {
-  icon=Icon(Icons.play_arrow);
-  isPlaying=true;
-  }
+  bool isPlaying = false;
+  bool isStop = false;
+  Icon play_icon = Icon(Icons.play_arrow);
+  Icon pause_icon = Icon(Icons.pause);
 
-  playAzkar(String? azkarLocation,int index) async {
-
+  playAzkar(String? azkarLocation, int index) async {
     currentIndex = index;
+    isPlaying = true;
     await player.setAsset(azkarLocation!);
     player.play();
     emit(PlayAzkarState());
   }
-  stopAzkar() async {
-    await player.stop();
+
+  stopAzkar() {
+    player.stop();
+    isPlaying = false;
+    isStop=true;
     emit(StopAzkarState());
   }
-  pauseAzkar() async {
-    await player.pause();
+
+  pauseAzkar() {
+    player.pause();
+    isPlaying = false;
+
     emit(PauseAzkarState());
   }
-  playAgainAzkar() async {
-    await player.play();
+
+  playAgainAzkar() {
+    player.play();
+    isPlaying = true;
+    isStop=false;
     emit(PlayAgainAzkarState());
+  }
+
+  bool isDark = false;
+  IconData? icon = Icons.brightness_4_outlined;
+  ThemeMode appMode = ThemeMode.light;
+
+  void changeMode({fromCache}) {
+    if (fromCache == null)
+      isDark = !isDark;
+    else
+      isDark = fromCache;
+    CacheHelper.saveData(key: 'isDark', value: isDark).then((value) {
+      if (isDark) {
+        icon = Icons.brightness_7;
+        appMode = ThemeMode.dark;
+      } else {
+        icon = Icons.brightness_4_outlined;
+        appMode = ThemeMode.light;
+      }
+      emit(ChangeModeState());
+    });
+  }
+
+  void seekToSecond(int second) {
+    Duration newDuration = Duration(seconds: second);
+    player.seek(newDuration);
+    emit(ChangePosition());
   }
 }
